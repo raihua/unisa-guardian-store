@@ -5,7 +5,7 @@
 
 import { SecurityAnswerService } from '../Services/security-answer.service'
 import { UserService } from '../Services/user.service'
-import { AbstractControl, UntypedFormControl, Validators } from '@angular/forms'
+import { AbstractControl, UntypedFormControl, Validators, ValidationErrors } from '@angular/forms'
 import { Component, NgZone, OnInit } from '@angular/core'
 import { SecurityQuestionService } from '../Services/security-question.service'
 import { Router } from '@angular/router'
@@ -18,6 +18,7 @@ import { SnackBarHelperService } from '../Services/snack-bar-helper.service'
 import { TranslateService } from '@ngx-translate/core'
 import { SecurityQuestion } from '../Models/securityQuestion.model'
 
+
 library.add(faUserPlus, faExclamationCircle)
 dom.watch()
 
@@ -28,7 +29,7 @@ dom.watch()
 })
 export class RegisterComponent implements OnInit {
   public emailControl: UntypedFormControl = new UntypedFormControl('', [Validators.required, Validators.email])
-  public passwordControl: UntypedFormControl = new UntypedFormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(40)])
+  public passwordControl: UntypedFormControl = new UntypedFormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(40), lowersCapsSpecialsNumsValidator])
   public repeatPasswordControl: UntypedFormControl = new UntypedFormControl('', [Validators.required, matchValidator(this.passwordControl)])
   public securityQuestionControl: UntypedFormControl = new UntypedFormControl('', [Validators.required])
   public securityAnswerControl: UntypedFormControl = new UntypedFormControl('', [Validators.required])
@@ -96,4 +97,16 @@ function matchValidator (passwordControl: AbstractControl) {
     }
     return null
   }
+}
+
+function lowersCapsSpecialsNumsValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value
+
+  const hasLowerCase = /[a-z]/.test(value)
+  const hasUpperCase = /[A-Z]/.test(value)
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value)
+  const hasNumbers  = /[0-9]/.test(value)
+
+  const isValid = hasLowerCase && hasUpperCase && hasSpecialChar && hasNumbers
+  return isValid ? null : { weakPassword: true }
 }
